@@ -41,6 +41,8 @@ public class ByteVector {
   /** The actual number of bytes in this vector. */
   int length;
 
+  public static final int BYTE_VECTOR_MAX_SIZE = 512000;
+
   /** Constructs a new {@link ByteVector} with a default initial capacity. */
   public ByteVector() {
     data = new byte[64];
@@ -236,12 +238,12 @@ public class ByteVector {
    * Puts an UTF8 string into this byte vector. The byte vector is automatically enlarged if
    * necessary.
    *
-   * @param stringValue a String whose UTF8 encoded length must be less than 65536.
+   * @param stringValue a String whose UTF8 encoded length must be less than BYTE_VECTOR_MAX_SIZE.
    * @return this byte vector.
    */
   public ByteVector putUTF8(final String stringValue) {
     int charLength = stringValue.length();
-    if (charLength > 65535) {
+    if (charLength > BYTE_VECTOR_MAX_SIZE) {
       throw new IllegalArgumentException("UTF8 string too large");
     }
     int currentLength = length;
@@ -261,7 +263,7 @@ public class ByteVector {
         currentData[currentLength++] = (byte) charValue;
       } else {
         length = currentLength;
-        return encodeUTF8(stringValue, i, 65535);
+        return encodeUTF8(stringValue, i, BYTE_VECTOR_MAX_SIZE);
       }
     }
     length = currentLength;

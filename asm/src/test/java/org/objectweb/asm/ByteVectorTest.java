@@ -35,6 +35,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import static org.objectweb.asm.ByteVector.BYTE_VECTOR_MAX_SIZE;
 
 /**
  * ByteVector tests.
@@ -105,7 +106,7 @@ public class ByteVectorTest {
     byteVector.putUTF8("abc");
     assertContains(byteVector, 0, 3, 'a', 'b', 'c');
 
-    char[] charBuffer = new char[65536];
+    char[] charBuffer = new char[BYTE_VECTOR_MAX_SIZE + 1];
     assertThrows(IllegalArgumentException.class, () -> byteVector.putUTF8(new String(charBuffer)));
   }
 
@@ -115,8 +116,10 @@ public class ByteVectorTest {
     byteVector.putUTF8("a\u0000\u0080\u0800");
     assertContains(byteVector, 0, 8, 'a', -64, -128, -62, -128, -32, -96, -128);
 
-    char[] charBuffer = new char[32768];
+    char[] charBuffer = new char[(ByteVector.BYTE_VECTOR_MAX_SIZE/2) + 1];
     Arrays.fill(charBuffer, '\u07FF');
+    String test = new String(charBuffer);
+    int size_test = test.length();
     IllegalArgumentException thrown =
         assertThrows(
             IllegalArgumentException.class, () -> byteVector.putUTF8(new String(charBuffer)));
@@ -124,13 +127,13 @@ public class ByteVectorTest {
   }
 
   @ParameterizedTest
-  @ValueSource(ints = {65535, 65536})
+  @ValueSource(ints = {BYTE_VECTOR_MAX_SIZE, BYTE_VECTOR_MAX_SIZE + 1})
   public void testPutUTF8_tooLong(int size) {
     ByteVector byteVector = new ByteVector(0);
     char[] charBuffer = new char[size];
     Arrays.fill(charBuffer, 'A');
     String utf8 = new String(charBuffer);
-    if (size > 65535) {
+    if (size > BYTE_VECTOR_MAX_SIZE) {
       IllegalArgumentException thrown =
           assertThrows(IllegalArgumentException.class, () -> byteVector.putUTF8(utf8));
       assertEquals("UTF8 string too large", thrown.getMessage());
