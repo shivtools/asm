@@ -116,7 +116,7 @@ public class ByteVectorTest {
     byteVector.putUTF8("a\u0000\u0080\u0800");
     assertContains(byteVector, 0, 8, 'a', -64, -128, -62, -128, -32, -96, -128);
 
-    char[] charBuffer = new char[(ByteVector.BYTE_VECTOR_MAX_SIZE/2) + 1];
+    char[] charBuffer = new char[(BYTE_VECTOR_MAX_SIZE/2) + 1];
     Arrays.fill(charBuffer, '\u07FF');
     String test = new String(charBuffer);
     int size_test = test.length();
